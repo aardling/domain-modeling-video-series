@@ -25,33 +25,52 @@ public class Tests
 
 public class Scenario
 {
-    public Scenario When(ReserveAnyBikeAtStation reserveAnyBikeAtStation)
+    private List<IEvent> _given;
+    private ICommand _when;
+
+    public Scenario When(ICommand when)
     {
+        this._when = when;
         return this;
     }
 
-    public Scenario Given(List<IEvent> events)
+    public Scenario Given(List<IEvent> given)
     {
+        this._given = given;
         return this;
     }
 
-    public void Then(List<IEvent> events)
+    public void Then(List<IEvent> then)
     {
-        Assert.Fail();
+        var actualEvent = new BikeAvailability(this._given).Handle(this._when);
+        Assert.That(then, Is.EqualTo(new List<IEvent> { actualEvent }));
     }
 }
 
-public interface IEvent
+class BikeAvailability
 {
+    private List<IEvent> given;
 
+    public BikeAvailability(List<IEvent> given)
+    {
+        this.given = given;
+    }
+
+    public IEvent Handle(ICommand when)
+    {
+        return new NoBikeReserved();
+    }
 }
+
+public interface IEvent { };
+public interface ICommand { };
 
 public record NoBikeReserved : IEvent
 {
 
 }
 
-public record ReserveAnyBikeAtStation
+public record ReserveAnyBikeAtStation : ICommand
 {
 
 }
