@@ -34,12 +34,21 @@ class BikeAvailability
 
     public IEvent Handle(ICommand when)
     {
+        return when switch
+        {
+            ReserveAnyBikeAtStation command => ReserveAnyBikeAtStation(command.StationId),
+            _ => throw new Exception(),
+        };
+    }
+
+    private IEvent ReserveAnyBikeAtStation(string stationId)
+    {
         if (this.given.Count == 0)
         {
             return new NoBikeReserved();
         }
 
-        return new AnyBikeReserved((when as ReserveAnyBikeAtStation).StationId);
+        return new AnyBikeReserved(stationId);
     }
 }
 
@@ -72,6 +81,15 @@ public class Tests
          .Given(new List<IEvent>() { new BikeAddedToStation("S1") })
          .When(new ReserveAnyBikeAtStation("S1"))
          .Then(new List<IEvent>() { new AnyBikeReserved("S1") });
+    }
+
+    [Test]
+    public void Given_Bike_Added_To_Station_When_reserving_a_bike_at_different_station_Then_reservation_should_fail()
+    {
+        new Scenario()
+         .Given(new List<IEvent>() { new BikeAddedToStation("S1") })
+         .When(new ReserveAnyBikeAtStation("S2"))
+         .Then(new List<IEvent>() { new NoBikeReserved() });
     }
 }
 
