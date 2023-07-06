@@ -1,5 +1,34 @@
 namespace Sharingo.Tests;
 
+public interface IEvent { };
+public interface ICommand { };
+
+public record NoBikeReserved : IEvent
+{
+
+}
+
+public record ReserveAnyBikeAtStation : ICommand
+{
+
+}
+
+
+class BikeAvailability
+{
+    private List<IEvent> given;
+
+    public BikeAvailability(List<IEvent> given)
+    {
+        this.given = given;
+    }
+
+    public IEvent Handle(ICommand when)
+    {
+        return new NoBikeReserved();
+    }
+}
+
 public class Tests
 {
     [SetUp]
@@ -23,6 +52,8 @@ public class Tests
     }
 }
 
+
+
 public class Scenario
 {
     private List<IEvent> _given;
@@ -45,32 +76,4 @@ public class Scenario
         var actualEvent = new BikeAvailability(this._given).Handle(this._when);
         Assert.That(then, Is.EqualTo(new List<IEvent> { actualEvent }));
     }
-}
-
-class BikeAvailability
-{
-    private List<IEvent> given;
-
-    public BikeAvailability(List<IEvent> given)
-    {
-        this.given = given;
-    }
-
-    public IEvent Handle(ICommand when)
-    {
-        return new NoBikeReserved();
-    }
-}
-
-public interface IEvent { };
-public interface ICommand { };
-
-public record NoBikeReserved : IEvent
-{
-
-}
-
-public record ReserveAnyBikeAtStation : ICommand
-{
-
 }
