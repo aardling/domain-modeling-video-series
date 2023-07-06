@@ -8,9 +8,18 @@ public record NoBikeReserved : IEvent
 
 }
 
-public record ReserveAnyBikeAtStation : ICommand
+public record ReserveAnyBikeAtStation(string StationId) : ICommand
 {
 
+}
+
+public record AnyBikeReserved(string StationId) : IEvent
+{
+
+}
+
+public record BikeAddedToStation(string StationId) : IEvent
+{
 }
 
 
@@ -25,7 +34,12 @@ class BikeAvailability
 
     public IEvent Handle(ICommand when)
     {
-        return new NoBikeReserved();
+        if (this.given.Count == 0)
+        {
+            return new NoBikeReserved();
+        }
+
+        return new AnyBikeReserved((when as ReserveAnyBikeAtStation).StationId);
     }
 }
 
@@ -47,12 +61,19 @@ public class Tests
     {
         new Scenario()
         .Given(new List<IEvent>())
-        .When(new ReserveAnyBikeAtStation())
+        .When(new ReserveAnyBikeAtStation("S1"))
         .Then(new List<IEvent>() { new NoBikeReserved() });
     }
+
+    [Test]
+    public void Given_Bike_Added_To_Station_When_reserving_a_bike_Then_reservation_should_succeed()
+    {
+        new Scenario()
+         .Given(new List<IEvent>() { new BikeAddedToStation("S1") })
+         .When(new ReserveAnyBikeAtStation("S1"))
+         .Then(new List<IEvent>() { new AnyBikeReserved("S1") });
+    }
 }
-
-
 
 public class Scenario
 {
